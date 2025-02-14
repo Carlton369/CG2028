@@ -1,0 +1,3 @@
+"./Src/asm_func.o"
+"./Src/main.o"
+"./Startup/startup_stm32l475vgtx.o"
