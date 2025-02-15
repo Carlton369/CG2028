@@ -73,19 +73,19 @@ start_day:
 	SUBS R4, #1
 	BNE start_day
 
-
 	POP {R3} //RESET ADDRESS CORRECTLY
+	PUSH {R3} //STORE INDEX AGAIN
 
 park_cars:
 	LDR R1, =max_car_per_section
-	LDR R6, [R3] //add first num in R0
+	LDR R0, [R3] //add first num in R0
 	//SUB R1, R6 //R1 now has number of cars that can fit
 	//branch here if remainder is greater than or less than entering cars
-	ADD R6, R5 //TRIES TO PARK ALL ENTERING CARS INTO THE CURRENT SECTION
-	CMP R1, R6 //CHECK IF OVER LIMIT
+	ADD R0, R5 //TRIES TO PARK ALL ENTERING CARS INTO THE CURRENT SECTION
+	CMP R1, R0 //CHECK IF OVER LIMIT
 	BGT no_leftover_cars
 
-	SUB R5, R6, R1 //FINDS HOW MANY CARS CANNOT FIT
+	SUB R5, R0, R1 //FINDS HOW MANY CARS CANNOT FIT
 	STR R1, [R3], #4 //MAXES OUT THE CURRENT SECTION AND MOVE TO NEXT
 
 	// REST CAN FIT IN CURRENT SECTION
@@ -93,9 +93,26 @@ park_cars:
 	BNE park_cars
 
 no_leftover_cars:
+	LDR R1, [R3]
+	ADD R5, R1
+	STR R5, [R3]
+	POP {R3}
+	LDR R4, =total_sections
+	 //RETURN TO ASM_FUNC
 
-	BX LR //RETURN TO ASM_FUNC
+//@R0 now used to store value in each section of result to check which one leaving
+//@R1 used to store value of no.of leaving cars per section
+leave_cars:
+	LDR R0, [R3]
+	LDR R1, [R2], #4
+	SUB R0, R1
 
+	STR R0, [R3], #4 //STORE NEW VAL BACK INTO RESULT[]
+
+	SUBS R4, #1
+	BNE leave_cars
+
+	BX LR
 
 
 
