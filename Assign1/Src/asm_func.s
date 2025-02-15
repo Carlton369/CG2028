@@ -62,29 +62,38 @@ add_loop:
 //	STR R5, [R3, #4] //print statement to check if sum working
 //can reuse R6 and R8
 	LDR R4, =total_sections //reset count
+	PUSH {R3} //STORE STARTING INDEX OF R3
 //R1 not being used anymore
 @R5 holds total cars entering
 //now use R1 to hold val of 12
 //and use R6 to hold building
+start_day:
+	LDR R6, [R0], #4
+	STR R6, [R3], #4
+	SUBS R4, #1
+	BNE start_day
+
+
+	POP {R3} //RESET ADDRESS CORRECTLY
+
 park_cars:
 	LDR R1, =max_car_per_section
-	LDR R6, [R0] //add first num in R0
-	SUB R1, R6 //R1 now has number of cars that can fit
+	LDR R6, [R3] //add first num in R0
+	//SUB R1, R6 //R1 now has number of cars that can fit
 	//branch here if remainder is greater than or less than entering cars
-	CMP R1, R5
+	ADD R6, R5 //TRIES TO PARK ALL ENTERING CARS INTO THE CURRENT SECTION
+	CMP R1, R6 //CHECK IF OVER LIMIT
 	BGT no_leftover_cars
-	//if here means section is going to be full, fill up then go to next section
-	LDR R8, =max_car_per_section
-	STR R8, [R3] //stores 12 in the RESULT SECTION
-	//INCREMENT INDEX FOR BOTH BUILDING AND RESULT
-	ADD R0, #4
-	ADD R3, #4
 
-	SUBS R5, R1 //FIND HOW MANY CARS LEFT
+	SUB R5, R6, R1 //FINDS HOW MANY CARS CANNOT FIT
+	STR R1, [R3], #4 //MAXES OUT THE CURRENT SECTION AND MOVE TO NEXT
+
+	// REST CAN FIT IN CURRENT SECTION
+	//INCREMENT INDEX FOR BOTH BUILDING AND RESULT
 	BNE park_cars
 
 no_leftover_cars:
-	//if got leftover cars, count how many leftover
+
 	BX LR //RETURN TO ASM_FUNC
 
 
