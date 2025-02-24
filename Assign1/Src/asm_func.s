@@ -32,7 +32,6 @@
 @ write your program from here:
 
 
-
 .equ total_sections, 6
 .equ max_car_per_section, 12
 asm_func:
@@ -47,18 +46,18 @@ asm_func:
 SUBROUTINE:
 	PUSH {R14}
 	//find total cars coming in
-	LDR R4, =total_sections
-	STR R4, [R3, #4]
+	LDR R4, [R3]
+	LDR R8, [R3, #4]
+	MUL R4, R8 //store total sections in r4
 	MOV R5, #0 //init count of cars entering to 0
 	MOV R6, #5 //size of entry[]
 
 add_loop:
-	LDR R8, [R1], #4 //R7 to store
+	LDR R8, [R1], #4 //R8 to store
 	ADD R5, R8
 
 	SUBS R6, #1 //check how many in entry[] left
 	BNE add_loop  //checks if flag updated from prev line
-
 //	STR R5, [R3, #4] //print statement to check if sum working
 //can reuse R6 and R8
 	LDR R4, =total_sections //reset count

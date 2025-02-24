@@ -27,13 +27,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 0000002a  00000000  00000000  000061d4  2**0
                   CONTENTS, READONLY
- 12 .debug_line   00000676  00000000  00000000  000061fe  2**0
+ 12 .debug_line   00000677  00000000  00000000  000061fe  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_line_str 0000006f  00000000  00000000  00006874  2**0
+ 13 .debug_line_str 0000006f  00000000  00000000  00006875  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_info   000001ac  00000000  00000000  000068e3  2**0
+ 14 .debug_info   000001ac  00000000  00000000  000068e4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_abbrev 0000011c  00000000  00000000  00006a8f  2**0
+ 15 .debug_abbrev 0000011c  00000000  00000000  00006a90  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_aranges 00000068  00000000  00000000  00006bb0  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
@@ -102,118 +102,120 @@ SUBROUTINE:
 	PUSH {R14}
  80001dc:	b500      	push	{lr}
 	//find total cars coming in
-	LDR R4, =total_sections
- 80001de:	f04f 0406 	mov.w	r4, #6
-	STR R4, [R3, #4]
- 80001e2:	605c      	str	r4, [r3, #4]
+	LDR R4, [R3]
+ 80001de:	681c      	ldr	r4, [r3, #0]
+	LDR R8, [R3, #4]
+ 80001e0:	f8d3 8004 	ldr.w	r8, [r3, #4]
+	MUL R4, R8 //store total sections in r4
+ 80001e4:	fb08 f404 	mul.w	r4, r8, r4
 	MOV R5, #0 //init count of cars entering to 0
- 80001e4:	f04f 0500 	mov.w	r5, #0
+ 80001e8:	f04f 0500 	mov.w	r5, #0
 	MOV R6, #5 //size of entry[]
- 80001e8:	f04f 0605 	mov.w	r6, #5
+ 80001ec:	f04f 0605 	mov.w	r6, #5
 
-080001ec <add_loop>:
+080001f0 <add_loop>:
 
 add_loop:
-	LDR R8, [R1], #4 //R7 to store
- 80001ec:	f851 8b04 	ldr.w	r8, [r1], #4
+	LDR R8, [R1], #4 //R8 to store
+ 80001f0:	f851 8b04 	ldr.w	r8, [r1], #4
 	ADD R5, R8
- 80001f0:	4445      	add	r5, r8
+ 80001f4:	4445      	add	r5, r8
 
 	SUBS R6, #1 //check how many in entry[] left
- 80001f2:	3e01      	subs	r6, #1
+ 80001f6:	3e01      	subs	r6, #1
 	BNE add_loop  //checks if flag updated from prev line
- 80001f4:	d1fa      	bne.n	80001ec <add_loop>
+ 80001f8:	d1fa      	bne.n	80001f0 <add_loop>
 
 //	STR R5, [R3, #4] //print statement to check if sum working
 //can reuse R6 and R8
 	LDR R4, =total_sections //reset count
- 80001f6:	f04f 0406 	mov.w	r4, #6
+ 80001fa:	f04f 0406 	mov.w	r4, #6
 	PUSH {R3} //STORE STARTING INDEX OF R3
- 80001fa:	b408      	push	{r3}
+ 80001fe:	b408      	push	{r3}
 
-080001fc <start_day>:
+08000200 <start_day>:
 //R1 not being used anymore
 @R5 holds total cars entering
 //now use R1 to hold val of 12
 //and use R6 to hold building
 start_day:
 	LDR R6, [R0], #4
- 80001fc:	f850 6b04 	ldr.w	r6, [r0], #4
+ 8000200:	f850 6b04 	ldr.w	r6, [r0], #4
 	STR R6, [R3], #4
- 8000200:	f843 6b04 	str.w	r6, [r3], #4
+ 8000204:	f843 6b04 	str.w	r6, [r3], #4
 	SUBS R4, #1
- 8000204:	3c01      	subs	r4, #1
+ 8000208:	3c01      	subs	r4, #1
 	BNE start_day
- 8000206:	d1f9      	bne.n	80001fc <start_day>
+ 800020a:	d1f9      	bne.n	8000200 <start_day>
 
 	POP {R3} //RESET ADDRESS CORRECTLY
- 8000208:	bc08      	pop	{r3}
+ 800020c:	bc08      	pop	{r3}
 	PUSH {R3} //STORE INDEX AGAIN
- 800020a:	b408      	push	{r3}
+ 800020e:	b408      	push	{r3}
 
-0800020c <park_cars>:
+08000210 <park_cars>:
 
 park_cars:
 	LDR R1, =max_car_per_section
- 800020c:	f04f 010c 	mov.w	r1, #12
+ 8000210:	f04f 010c 	mov.w	r1, #12
 	LDR R0, [R3] //add first num in R0
- 8000210:	6818      	ldr	r0, [r3, #0]
+ 8000214:	6818      	ldr	r0, [r3, #0]
 	//SUB R1, R6 //R1 now has number of cars that can fit
 	//branch here if remainder is greater than or less than entering cars
 	ADD R0, R5 //TRIES TO PARK ALL ENTERING CARS INTO THE CURRENT SECTION
- 8000212:	4428      	add	r0, r5
+ 8000216:	4428      	add	r0, r5
 	CMP R1, R0 //CHECK IF OVER LIMIT
- 8000214:	4281      	cmp	r1, r0
+ 8000218:	4281      	cmp	r1, r0
 	BGT no_leftover_cars
- 8000216:	dc04      	bgt.n	8000222 <no_leftover_cars>
+ 800021a:	dc04      	bgt.n	8000226 <no_leftover_cars>
 
 	SUB R5, R0, R1 //FINDS HOW MANY CARS CANNOT FIT
- 8000218:	eba0 0501 	sub.w	r5, r0, r1
+ 800021c:	eba0 0501 	sub.w	r5, r0, r1
 	STR R1, [R3], #4 //MAXES OUT THE CURRENT SECTION AND MOVE TO NEXT
- 800021c:	f843 1b04 	str.w	r1, [r3], #4
+ 8000220:	f843 1b04 	str.w	r1, [r3], #4
 
 	// REST CAN FIT IN CURRENT SECTION
 	//INCREMENT INDEX FOR BOTH BUILDING AND RESULT
 	BNE park_cars
- 8000220:	d1f4      	bne.n	800020c <park_cars>
+ 8000224:	d1f4      	bne.n	8000210 <park_cars>
 
-08000222 <no_leftover_cars>:
+08000226 <no_leftover_cars>:
 
 no_leftover_cars:
 	LDR R1, [R3]
- 8000222:	6819      	ldr	r1, [r3, #0]
+ 8000226:	6819      	ldr	r1, [r3, #0]
 	ADD R5, R1
- 8000224:	440d      	add	r5, r1
+ 8000228:	440d      	add	r5, r1
 	STR R5, [R3]
- 8000226:	601d      	str	r5, [r3, #0]
+ 800022a:	601d      	str	r5, [r3, #0]
 	POP {R3}
- 8000228:	bc08      	pop	{r3}
+ 800022c:	bc08      	pop	{r3}
 	LDR R4, =total_sections
- 800022a:	f04f 0406 	mov.w	r4, #6
+ 800022e:	f04f 0406 	mov.w	r4, #6
 
-0800022e <leave_cars>:
+08000232 <leave_cars>:
 	 //RETURN TO ASM_FUNC
 
 //@R0 now used to store value in each section of result to check which one leaving
 //@R1 used to store value of no.of leaving cars per section
 leave_cars:
 	LDR R0, [R3]
- 800022e:	6818      	ldr	r0, [r3, #0]
+ 8000232:	6818      	ldr	r0, [r3, #0]
 	LDR R1, [R2], #4
- 8000230:	f852 1b04 	ldr.w	r1, [r2], #4
+ 8000234:	f852 1b04 	ldr.w	r1, [r2], #4
 	SUB R0, R1
- 8000234:	eba0 0001 	sub.w	r0, r0, r1
+ 8000238:	eba0 0001 	sub.w	r0, r0, r1
 
 	STR R0, [R3], #4 //STORE NEW VAL BACK INTO RESULT[]
- 8000238:	f843 0b04 	str.w	r0, [r3], #4
+ 800023c:	f843 0b04 	str.w	r0, [r3], #4
 
 	SUBS R4, #1
- 800023c:	3c01      	subs	r4, #1
+ 8000240:	3c01      	subs	r4, #1
 	BNE leave_cars
- 800023e:	d1f6      	bne.n	800022e <leave_cars>
+ 8000242:	d1f6      	bne.n	8000232 <leave_cars>
 
 	BX LR
- 8000240:	4770      	bx	lr
+ 8000244:	4770      	bx	lr
 	...
 
 08000250 <memchr>:
