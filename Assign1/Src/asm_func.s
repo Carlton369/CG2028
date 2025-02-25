@@ -59,13 +59,16 @@ add_loop:
 	BNE add_loop  //checks if flag updated from prev line
 
 	LDR R1, =max_cars_per_section
+
 @ R0 BUILDING
 @ R1 max cars per section
 @ R2 EXIT
 @ R3 RESULT
 @ R4 total number of sections, used for iteration
 @ R5 number of entering cars
+@ R6 used for calculation of value to be put into result[][]
 @ DO NOT TOUCH R7
+@ R8 used to hold value of cars exiting from section for calculation
 @ R10 to store number of cars that can enter in each section
 @ R12 total number of sections
 
@@ -78,7 +81,7 @@ handle_day:
 	B no_leftover_cars
 
 leftover_cars:
-	LDR R8, [R2] @load exiting cars in r9
+	LDR R8, [R2] @load exiting cars in r8
 	SUBS R6, R1, R8
 	BMI neg_cars
 	STR R6, [R3]
