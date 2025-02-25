@@ -78,16 +78,23 @@ handle_day:
 	B no_leftover_cars
 
 leftover_cars:
-	LDR R9, [R2] @load exiting cars in r9
-	SUB R8, R1, R9
-	STR R8, [R3]
+	LDR R8, [R2] @load exiting cars in r9
+	SUBS R6, R1, R8
+	BMI neg_cars
+	STR R6, [R3]
 	SUB R5, R10
 	B go_next_section
 
+neg_cars:
+	MOV R6, #0
+	STR R6, [R3]
+	B go_next_section
+
 no_leftover_cars:
-	LDR R9, [R2] //load exiting cars from section
+	LDR R8, [R2] //load exiting cars from section
 	ADD R6, R5 //add current cars with leftover cars
-	SUB R6, R9
+	SUBS R6, R8
+	BMI neg_cars
 	STR R6, [R3]
 	MOV R5, #0
 	CMP R4, #0
@@ -106,44 +113,3 @@ go_next_section:
 end_loop:
 	POP {R14}
 	BX LR
-	/*
-park_cars:
-	LDR R1, =max_car_per_section
-	LDR R0, [R3] //add first num in R0
-	//SUB R1, R6 //R1 now has number of cars that can fit
-	//branch here if remainder is greater than or less than entering cars
-	ADD R0, R5 //TRIES TO PARK ALL ENTERING CARS INTO THE CURRENT SECTION
-	CMP R1, R0 //CHECK IF OVER LIMIT
-	BGT no_leftover_cars
-
-	SUB R5, R0, R1 //FINDS HOW MANY CARS CANNOT FIT
-	STR R1, [R3], #4 //MAXES OUT THE CURRENT SECTION AND MOVE TO NEXT
-
-	// REST CAN FIT IN CURRENT SECTION
-	//INCREMENT INDEX FOR BOTH BUILDING AND RESULT
-	BNE park_cars
-
-no_leftover_cars:
-	LDR R1, [R3]
-	ADD R5, R1
-	STR R5, [R3]
-	POP {R3}
-	MOV R4, R12
-	 //RETURN TO ASM_FUNC
-
-//@R0 now used to store value in each section of result to check which one leaving
-//@R1 used to store value of no.of leaving cars per section
-leave_cars:
-	LDR R0, [R3]
-	LDR R1, [R2], #4
-	SUB R0, R1
-
-	STR R0, [R3], #4 //STORE NEW VAL BACK INTO RESULT[]
-
-	SUBS R4, #1
-	BNE leave_cars
-
-	BX LR
-
-*/
-

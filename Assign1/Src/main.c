@@ -32,10 +32,9 @@ int main(void)
 	int i,j;
 	int building[F][S] = {{9,10},{7,8},{4,4}};
 
-	int entry[5] = {2,4,6,8,10};
+	int entry[5] = {0,0,0,0,0};
 
-	int exit[F][S] = {{1,1},{1,1},{1,1}};
-
+	int exit[F][S] = {{12,12},{12,12},{12,12}};
 
 	int result[F][S] = {{F,S},{0,0},{0,0}};
 
@@ -52,5 +51,5 @@ int main(void)
 		}
 	printf("\n");
 	}
-
+	printf("done");
 }
