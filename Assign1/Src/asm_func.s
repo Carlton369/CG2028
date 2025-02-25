@@ -31,9 +31,8 @@
 
 @ write your program from here:
 
+.equ max_cars_per_section, 12
 
-.equ total_sections, 6
-.equ max_car_per_section, 12
 asm_func:
  	PUSH {R14}
 
@@ -46,35 +45,68 @@ asm_func:
 SUBROUTINE:
 	PUSH {R14}
 	//find total cars coming in
-	LDR R4, [R3]
-	LDR R8, [R3, #4]
+	LDR R4, [R3] @load f into r4
+	LDR R8, [R3, #4] @load s into r8
 	MUL R4, R8 //store total sections in r4
 	MOV R5, #0 //init count of cars entering to 0
 	MOV R6, #5 //size of entry[]
 
 add_loop:
 	LDR R8, [R1], #4 //R8 to store
-	ADD R5, R8
+	ADD R5, R8 //add to total cars
 
 	SUBS R6, #1 //check how many in entry[] left
 	BNE add_loop  //checks if flag updated from prev line
-//	STR R5, [R3, #4] //print statement to check if sum working
-//can reuse R6 and R8
-	LDR R4, =total_sections //reset count
-	PUSH {R3} //STORE STARTING INDEX OF R3
-//R1 not being used anymore
-@R5 holds total cars entering
-//now use R1 to hold val of 12
-//and use R6 to hold building
-start_day:
-	LDR R6, [R0], #4
-	STR R6, [R3], #4
+
+	LDR R1, =max_cars_per_section
+@ R0 BUILDING
+@ R1 max cars per section
+@ R2 EXIT
+@ R3 RESULT
+@ R4 total number of sections, used for iteration
+@ R5 number of entering cars
+@ DO NOT TOUCH R7
+@ R10 to store number of cars that can enter in each section
+@ R12 total number of sections
+
+handle_day:
+	LDR R6, [R0] @use R6 to hold cars in current section for calculation
+	SUB R10, R1, R6 @r10 to hold #cars that can enter curr section
+
+	CMP R5, R10
+	BGT leftover_cars
+	B no_leftover_cars
+
+leftover_cars:
+	LDR R9, [R2] @load exiting cars in r9
+	SUB R8, R1, R9
+	STR R8, [R3]
+	SUB R5, R10
+	B go_next_section
+
+no_leftover_cars:
+	LDR R9, [R2] //load exiting cars from section
+	ADD R6, R5 //add current cars with leftover cars
+	SUB R6, R9
+	STR R6, [R3]
+	MOV R5, #0
+	CMP R4, #0
+	BEQ end_loop
+	B go_next_section
+
+go_next_section:
+	@iterate to next index in loops
+	ADD R0, #4
+	ADD R2, #4
+	ADD R3, #4
+	@how many sections remaining
 	SUBS R4, #1
-	BNE start_day
+	BNE handle_day
 
-	POP {R3} //RESET ADDRESS CORRECTLY
-	PUSH {R3} //STORE INDEX AGAIN
-
+end_loop:
+	POP {R14}
+	BX LR
+	/*
 park_cars:
 	LDR R1, =max_car_per_section
 	LDR R0, [R3] //add first num in R0
@@ -96,7 +128,7 @@ no_leftover_cars:
 	ADD R5, R1
 	STR R5, [R3]
 	POP {R3}
-	LDR R4, =total_sections
+	MOV R4, R12
 	 //RETURN TO ASM_FUNC
 
 //@R0 now used to store value in each section of result to check which one leaving
@@ -113,5 +145,5 @@ leave_cars:
 
 	BX LR
 
-
+*/
 

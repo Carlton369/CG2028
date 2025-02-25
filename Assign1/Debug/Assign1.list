@@ -79,10 +79,10 @@ Disassembly of section .text:
  80001cc:	08003d50 	.word	0x08003d50
 
 080001d0 <asm_func>:
+@ write your program from here:
 
+.equ max_cars_per_section, 12
 
-.equ total_sections, 6
-.equ max_car_per_section, 12
 asm_func:
  	PUSH {R14}
  80001d0:	b500      	push	{lr}
@@ -102,9 +102,9 @@ SUBROUTINE:
 	PUSH {R14}
  80001dc:	b500      	push	{lr}
 	//find total cars coming in
-	LDR R4, [R3]
+	LDR R4, [R3] @load f into r4
  80001de:	681c      	ldr	r4, [r3, #0]
-	LDR R8, [R3, #4]
+	LDR R8, [R3, #4] @load s into r8
  80001e0:	f8d3 8004 	ldr.w	r8, [r3, #4]
 	MUL R4, R8 //store total sections in r4
  80001e4:	fb08 f404 	mul.w	r4, r8, r4
@@ -118,7 +118,7 @@ SUBROUTINE:
 add_loop:
 	LDR R8, [R1], #4 //R8 to store
  80001f0:	f851 8b04 	ldr.w	r8, [r1], #4
-	ADD R5, R8
+	ADD R5, R8 //add to total cars
  80001f4:	4445      	add	r5, r8
 
 	SUBS R6, #1 //check how many in entry[] left
@@ -126,96 +126,84 @@ add_loop:
 	BNE add_loop  //checks if flag updated from prev line
  80001f8:	d1fa      	bne.n	80001f0 <add_loop>
 
-//	STR R5, [R3, #4] //print statement to check if sum working
-//can reuse R6 and R8
-	LDR R4, =total_sections //reset count
- 80001fa:	f04f 0406 	mov.w	r4, #6
-	PUSH {R3} //STORE STARTING INDEX OF R3
- 80001fe:	b408      	push	{r3}
+	LDR R1, =max_cars_per_section
+ 80001fa:	f04f 010c 	mov.w	r1, #12
 
-08000200 <start_day>:
-//R1 not being used anymore
-@R5 holds total cars entering
-//now use R1 to hold val of 12
-//and use R6 to hold building
-start_day:
-	LDR R6, [R0], #4
- 8000200:	f850 6b04 	ldr.w	r6, [r0], #4
-	STR R6, [R3], #4
- 8000204:	f843 6b04 	str.w	r6, [r3], #4
-	SUBS R4, #1
- 8000208:	3c01      	subs	r4, #1
-	BNE start_day
- 800020a:	d1f9      	bne.n	8000200 <start_day>
+080001fe <handle_day>:
+@ DO NOT TOUCH R7
+@ R10 to store number of cars that can enter in each section
+@ R12 total number of sections
 
-	POP {R3} //RESET ADDRESS CORRECTLY
- 800020c:	bc08      	pop	{r3}
-	PUSH {R3} //STORE INDEX AGAIN
- 800020e:	b408      	push	{r3}
+handle_day:
+	LDR R6, [R0] @use R6 to hold cars in current section for calculation
+ 80001fe:	6806      	ldr	r6, [r0, #0]
+	SUB R10, R1, R6 @r10 to hold #cars that can enter curr section
+ 8000200:	eba1 0a06 	sub.w	sl, r1, r6
 
-08000210 <park_cars>:
+	CMP R5, R10
+ 8000204:	4555      	cmp	r5, sl
+	BGT leftover_cars
+ 8000206:	dc00      	bgt.n	800020a <leftover_cars>
+	B no_leftover_cars
+ 8000208:	e008      	b.n	800021c <no_leftover_cars>
 
-park_cars:
-	LDR R1, =max_car_per_section
- 8000210:	f04f 010c 	mov.w	r1, #12
-	LDR R0, [R3] //add first num in R0
- 8000214:	6818      	ldr	r0, [r3, #0]
-	//SUB R1, R6 //R1 now has number of cars that can fit
-	//branch here if remainder is greater than or less than entering cars
-	ADD R0, R5 //TRIES TO PARK ALL ENTERING CARS INTO THE CURRENT SECTION
- 8000216:	4428      	add	r0, r5
-	CMP R1, R0 //CHECK IF OVER LIMIT
- 8000218:	4281      	cmp	r1, r0
-	BGT no_leftover_cars
- 800021a:	dc04      	bgt.n	8000226 <no_leftover_cars>
+0800020a <leftover_cars>:
 
-	SUB R5, R0, R1 //FINDS HOW MANY CARS CANNOT FIT
- 800021c:	eba0 0501 	sub.w	r5, r0, r1
-	STR R1, [R3], #4 //MAXES OUT THE CURRENT SECTION AND MOVE TO NEXT
- 8000220:	f843 1b04 	str.w	r1, [r3], #4
+leftover_cars:
+	LDR R9, [R2] @load exiting cars in r9
+ 800020a:	f8d2 9000 	ldr.w	r9, [r2]
+	SUB R8, R1, R9
+ 800020e:	eba1 0809 	sub.w	r8, r1, r9
+	STR R8, [R3]
+ 8000212:	f8c3 8000 	str.w	r8, [r3]
+	SUB R5, R10
+ 8000216:	eba5 050a 	sub.w	r5, r5, sl
+	B go_next_section
+ 800021a:	e00a      	b.n	8000232 <go_next_section>
 
-	// REST CAN FIT IN CURRENT SECTION
-	//INCREMENT INDEX FOR BOTH BUILDING AND RESULT
-	BNE park_cars
- 8000224:	d1f4      	bne.n	8000210 <park_cars>
-
-08000226 <no_leftover_cars>:
+0800021c <no_leftover_cars>:
 
 no_leftover_cars:
-	LDR R1, [R3]
- 8000226:	6819      	ldr	r1, [r3, #0]
-	ADD R5, R1
- 8000228:	440d      	add	r5, r1
-	STR R5, [R3]
- 800022a:	601d      	str	r5, [r3, #0]
-	POP {R3}
- 800022c:	bc08      	pop	{r3}
-	LDR R4, =total_sections
- 800022e:	f04f 0406 	mov.w	r4, #6
+	LDR R9, [R2] //load exiting cars from section
+ 800021c:	f8d2 9000 	ldr.w	r9, [r2]
+	ADD R6, R5 //add current cars with leftover cars
+ 8000220:	442e      	add	r6, r5
+	SUB R6, R9
+ 8000222:	eba6 0609 	sub.w	r6, r6, r9
+	STR R6, [R3]
+ 8000226:	601e      	str	r6, [r3, #0]
+	MOV R5, #0
+ 8000228:	f04f 0500 	mov.w	r5, #0
+	CMP R4, #0
+ 800022c:	2c00      	cmp	r4, #0
+	BEQ end_loop
+ 800022e:	d008      	beq.n	8000242 <end_loop>
+	B go_next_section
+ 8000230:	e7ff      	b.n	8000232 <go_next_section>
 
-08000232 <leave_cars>:
-	 //RETURN TO ASM_FUNC
+08000232 <go_next_section>:
 
-//@R0 now used to store value in each section of result to check which one leaving
-//@R1 used to store value of no.of leaving cars per section
-leave_cars:
-	LDR R0, [R3]
- 8000232:	6818      	ldr	r0, [r3, #0]
-	LDR R1, [R2], #4
- 8000234:	f852 1b04 	ldr.w	r1, [r2], #4
-	SUB R0, R1
- 8000238:	eba0 0001 	sub.w	r0, r0, r1
-
-	STR R0, [R3], #4 //STORE NEW VAL BACK INTO RESULT[]
- 800023c:	f843 0b04 	str.w	r0, [r3], #4
-
+go_next_section:
+	@iterate to next index in loops
+	ADD R0, #4
+ 8000232:	f100 0004 	add.w	r0, r0, #4
+	ADD R2, #4
+ 8000236:	f102 0204 	add.w	r2, r2, #4
+	ADD R3, #4
+ 800023a:	f103 0304 	add.w	r3, r3, #4
+	@how many sections remaining
 	SUBS R4, #1
- 8000240:	3c01      	subs	r4, #1
-	BNE leave_cars
- 8000242:	d1f6      	bne.n	8000232 <leave_cars>
+ 800023e:	3c01      	subs	r4, #1
+	BNE handle_day
+ 8000240:	d1dd      	bne.n	80001fe <handle_day>
 
+08000242 <end_loop>:
+
+end_loop:
+	POP {R14}
+ 8000242:	f85d eb04 	ldr.w	lr, [sp], #4
 	BX LR
- 8000244:	4770      	bx	lr
+ 8000246:	4770      	bx	lr
 	...
 
 08000250 <memchr>:
@@ -1087,7 +1075,7 @@ int main(void)
 	initialise_monitor_handles();
  8000c2e:	f000 fadf 	bl	80011f0 <initialise_monitor_handles>
 	int i,j;
-	int building[F][S] = {{8,8},{8,8},{8,8}};
+	int building[F][S] = {{9,10},{7,8},{4,4}};
  8000c32:	4b35      	ldr	r3, [pc, #212]	@ (8000d08 <main+0xe0>)
  8000c34:	f107 0448 	add.w	r4, r7, #72	@ 0x48
  8000c38:	461d      	mov	r5, r3
@@ -1095,7 +1083,8 @@ int main(void)
  8000c3c:	c40f      	stmia	r4!, {r0, r1, r2, r3}
  8000c3e:	e895 0003 	ldmia.w	r5, {r0, r1}
  8000c42:	e884 0003 	stmia.w	r4, {r0, r1}
-	int entry[5] = {1,2,3,4,5};
+
+	int entry[5] = {2,4,6,8,10};
  8000c46:	4b31      	ldr	r3, [pc, #196]	@ (8000d0c <main+0xe4>)
  8000c48:	f107 0434 	add.w	r4, r7, #52	@ 0x34
  8000c4c:	461d      	mov	r5, r3
@@ -1103,7 +1092,8 @@ int main(void)
  8000c50:	c40f      	stmia	r4!, {r0, r1, r2, r3}
  8000c52:	682b      	ldr	r3, [r5, #0]
  8000c54:	6023      	str	r3, [r4, #0]
-	int exit[F][S] = {{1,2},{2,3},{3,4}};
+
+	int exit[F][S] = {{1,1},{1,1},{1,1}};
  8000c56:	4b2e      	ldr	r3, [pc, #184]	@ (8000d10 <main+0xe8>)
  8000c58:	f107 041c 	add.w	r4, r7, #28
  8000c5c:	461d      	mov	r5, r3
@@ -1111,6 +1101,8 @@ int main(void)
  8000c60:	c40f      	stmia	r4!, {r0, r1, r2, r3}
  8000c62:	e895 0003 	ldmia.w	r5, {r0, r1}
  8000c66:	e884 0003 	stmia.w	r4, {r0, r1}
+
+
 	int result[F][S] = {{F,S},{0,0},{0,0}};
  8000c6a:	4b2a      	ldr	r3, [pc, #168]	@ (8000d14 <main+0xec>)
  8000c6c:	1d3c      	adds	r4, r7, #4
