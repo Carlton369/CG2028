@@ -130,7 +130,7 @@ add_loop:
  80001fa:	f04f 010c 	mov.w	r1, #12
 
 080001fe <handle_day>:
-@ DO NOT TOUCH R7
+@ R8 used to hold value of cars exiting from section for calculation
 @ R10 to store number of cars that can enter in each section
 @ R12 total number of sections
 
@@ -150,7 +150,7 @@ handle_day:
 0800020a <leftover_cars>:
 
 leftover_cars:
-	LDR R8, [R2] @load exiting cars in r9
+	LDR R8, [R2] @load exiting cars in r8
  800020a:	f8d2 8000 	ldr.w	r8, [r2]
 	SUBS R6, R1, R8
  800020e:	ebb1 0608 	subs.w	r6, r1, r8

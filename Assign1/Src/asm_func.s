@@ -73,7 +73,7 @@ add_loop:
 @ R12 total number of sections
 
 handle_day:
-	LDR R6, [R0] @use R6 to hold cars in current section for calculation
+	LDR R6, [R0], #4 @use R6 to hold cars in current section for calculation
 	SUB R10, R1, R6 @r10 to hold #cars that can enter curr section
 
 	CMP R5, R10
@@ -81,34 +81,30 @@ handle_day:
 	B no_leftover_cars
 
 leftover_cars:
-	LDR R8, [R2] @load exiting cars in r8
+	LDR R8, [R2], #4 @load exiting cars in r8
 	SUBS R6, R1, R8
 	BMI neg_cars
-	STR R6, [R3]
+	STR R6, [R3], #4
 	SUB R5, R10
 	B go_next_section
 
 neg_cars:
 	MOV R6, #0
-	STR R6, [R3]
+	STR R6, [R3], #4
 	B go_next_section
 
 no_leftover_cars:
-	LDR R8, [R2] //load exiting cars from section
+	LDR R8, [R2], #4 //load exiting cars from section
 	ADD R6, R5 //add current cars with leftover cars
 	SUBS R6, R8
 	BMI neg_cars
-	STR R6, [R3]
+	STR R6, [R3], #4
 	MOV R5, #0
 	CMP R4, #0
 	BEQ end_loop
 	B go_next_section
 
 go_next_section:
-	@iterate to next index in loops
-	ADD R0, #4
-	ADD R2, #4
-	ADD R3, #4
 	@how many sections remaining
 	SUBS R4, #1
 	BNE handle_day
