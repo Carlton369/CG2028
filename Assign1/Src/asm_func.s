@@ -39,14 +39,14 @@ asm_func:
  	PUSH {R4-R7, R14} //rest should be untouched
 	//find total cars coming in
 	LDR R4, [R3] @load f into r4
-	LDR R8, [R3, #4] @load s into r8
-	MUL R4, R8 //store total sections in r4
+	LDR R5, [R3, #4] @load s into r5
+	MUL R4, R5 //store total sections in r4
 	MOV R5, #0 //init count of cars entering to 0
 	MOV R6, #5 //size of entry[]
 
 add_loop:
-	LDR R8, [R1], #4 //R8 to store
-	ADD R5, R8 //add to total cars
+	LDR R7, [R1], #4 //R8 to store
+	ADD R5, R7 //add to total cars
 
 	SUBS R6, #1 //check how many in entry[] left
 	BNE add_loop  //checks if flag updated from prev line
