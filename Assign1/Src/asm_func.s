@@ -36,14 +36,6 @@
 asm_func:
  	PUSH {R14}
 
-	BL SUBROUTINE
-
- 	POP {R14}
-
-	BX LR
-
-SUBROUTINE:
-	PUSH {R14}
 	//find total cars coming in
 	LDR R4, [R3] @load f into r4
 	LDR R8, [R3, #4] @load s into r8
