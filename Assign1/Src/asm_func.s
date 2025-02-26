@@ -45,7 +45,7 @@ asm_func:
 	MOV R6, #5 //size of entry[]
 
 add_loop:
-	LDR R7, [R1], #4 //R8 to store
+	LDR R7, [R1], #4 //R7 to store
 	ADD R5, R7 //add to total cars
 
 	SUBS R6, #1 //check how many in entry[] left
