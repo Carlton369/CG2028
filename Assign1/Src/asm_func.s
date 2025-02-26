@@ -42,7 +42,7 @@ asm_func:
 	LDR R5, [R3, #4] @load s into r5
 	MUL R4, R5 //store total sections in r4
 	MOV R5, #0 //init count of cars entering to 0
-	MOV R6, #5 //size of entry[]
+	LDR R6, [R3, #8] //size of entry[]
 
 add_loop:
 	LDR R7, [R1], #4 //R7 to store

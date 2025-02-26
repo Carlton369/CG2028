@@ -22,6 +22,7 @@
 
 #define F 3
 #define S 2
+#define N 5 //size of entry[] array
 
 extern void asm_func(int* arg1, int* arg2, int* arg3, int* arg4);
 extern void initialise_monitor_handles(void);
@@ -31,9 +32,9 @@ int main(void)
 	initialise_monitor_handles();
 	int i,j;
 	int building[F][S] = {{8,8},{8,8},{8,8}};
-	int entry[5] = {1,2,3,4,5};
+	int entry[N] = {1,2,3,4,5};
 	int exit[F][S] = {{1,2},{2,3},{3,4}};
-	int result[F][S] = {{F,S},{0,0},{0,0}};
+	int result[F][S] = {{F,S},{N,0},{0,0}};
 
 	asm_func((int*)building, (int*)entry, (int*)exit, (int*)result);
 

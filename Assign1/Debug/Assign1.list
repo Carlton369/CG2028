@@ -41,11 +41,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  18 .debug_rnglists 0000002d  00000000  00000000  0000d7a5  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_macro  0000178c  00000000  00000000  0000d7d2  2**0
+ 19 .debug_macro  00001792  00000000  00000000  0000d7d2  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000043  00000000  00000000  0000ef5e  2**0
+ 20 .comment      00000043  00000000  00000000  0000ef64  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  00001554  00000000  00000000  0000efa4  2**2
+ 21 .debug_frame  00001554  00000000  00000000  0000efa8  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -95,72 +95,73 @@ asm_func:
  80001d6:	fb05 f404 	mul.w	r4, r5, r4
 	MOV R5, #0 //init count of cars entering to 0
  80001da:	f04f 0500 	mov.w	r5, #0
-	MOV R6, #5 //size of entry[]
- 80001de:	f04f 0605 	mov.w	r6, #5
+	LDR R6, [R3, #8] //size of entry[]
+ 80001de:	689e      	ldr	r6, [r3, #8]
 
-080001e2 <add_loop>:
+080001e0 <add_loop>:
 
 add_loop:
-	LDR R7, [R1], #4 //R8 to store
- 80001e2:	f851 7b04 	ldr.w	r7, [r1], #4
+	LDR R7, [R1], #4 //R7 to store
+ 80001e0:	f851 7b04 	ldr.w	r7, [r1], #4
 	ADD R5, R7 //add to total cars
- 80001e6:	443d      	add	r5, r7
+ 80001e4:	443d      	add	r5, r7
 
 	SUBS R6, #1 //check how many in entry[] left
- 80001e8:	3e01      	subs	r6, #1
+ 80001e6:	3e01      	subs	r6, #1
 	BNE add_loop  //checks if flag updated from prev line
- 80001ea:	d1fa      	bne.n	80001e2 <add_loop>
+ 80001e8:	d1fa      	bne.n	80001e0 <add_loop>
 
 	LDR R1, =max_cars_per_section
- 80001ec:	f04f 010c 	mov.w	r1, #12
+ 80001ea:	f04f 010c 	mov.w	r1, #12
 
-080001f0 <handle_day>:
+080001ee <handle_day>:
 
 handle_day:
 	LDR R6, [R0], #4 @use R6 to hold cars in current section for calculation
- 80001f0:	f850 6b04 	ldr.w	r6, [r0], #4
+ 80001ee:	f850 6b04 	ldr.w	r6, [r0], #4
 	LDR R7, [R2], #4 @load exiting cars from section
- 80001f4:	f852 7b04 	ldr.w	r7, [r2], #4
+ 80001f2:	f852 7b04 	ldr.w	r7, [r2], #4
 	SUB R6, R1, R6 @r6 to hold #cars that can enter curr section
- 80001f8:	eba1 0606 	sub.w	r6, r1, r6
+ 80001f6:	eba1 0606 	sub.w	r6, r1, r6
 
 	CMP R5, R6 //check if got excess cars
- 80001fc:	42b5      	cmp	r5, r6
+ 80001fa:	42b5      	cmp	r5, r6
 	ITT GE //got excess cars or just nice
- 80001fe:	bfa4      	itt	ge
+ 80001fc:	bfa4      	itt	ge
 		SUBGE R5, R6 //subtract from sum of unparked cars
- 8000200:	1bad      	subge	r5, r5, r6
+ 80001fe:	1bad      	subge	r5, r5, r6
 		MOVGE R6, R1 //make r6 max cars
- 8000202:	460e      	movge	r6, r1
+ 8000200:	460e      	movge	r6, r1
 
 	ITTT LT //rest can fit
- 8000204:	bfbe      	ittt	lt
+ 8000202:	bfbe      	ittt	lt
 		SUBLT R6, R1, R6 //make r6 hold cars alr parked
- 8000206:	1b8e      	sublt	r6, r1, r6
+ 8000204:	1b8e      	sublt	r6, r1, r6
 		ADDLT R6, R5 //find total #cars now parked
- 8000208:	1976      	addlt	r6, r6, r5
+ 8000206:	1976      	addlt	r6, r6, r5
 		MOVLT R5, #0
- 800020a:	2500      	movlt	r5, #0
+ 8000208:	2500      	movlt	r5, #0
 
 	//at this point R6 should either 12 or number of cars needed to park
 	SUBS R6, R7 //exit
- 800020c:	1bf6      	subs	r6, r6, r7
+ 800020a:	1bf6      	subs	r6, r6, r7
 	IT MI
- 800020e:	bf48      	it	mi
+ 800020c:	bf48      	it	mi
 		MOVMI R6, #0 //set to 0 to prevent underflow
- 8000210:	2600      	movmi	r6, #0
+ 800020e:	2600      	movmi	r6, #0
 
 	STR R6, [R3], #4
- 8000212:	f843 6b04 	str.w	r6, [r3], #4
+ 8000210:	f843 6b04 	str.w	r6, [r3], #4
 	SUBS R4, #1
- 8000216:	3c01      	subs	r4, #1
+ 8000214:	3c01      	subs	r4, #1
 	BNE handle_day
- 8000218:	d1ea      	bne.n	80001f0 <handle_day>
+ 8000216:	d1ea      	bne.n	80001ee <handle_day>
 
 	POP {R4-R7,R14}
- 800021a:	e8bd 40f0 	ldmia.w	sp!, {r4, r5, r6, r7, lr}
+ 8000218:	e8bd 40f0 	ldmia.w	sp!, {r4, r5, r6, r7, lr}
 	BX LR
- 800021e:	4770      	bx	lr
+ 800021c:	4770      	bx	lr
+	...
 
 08000220 <memchr>:
  8000220:	f001 01ff 	and.w	r1, r1, #255	@ 0xff
@@ -1039,7 +1040,7 @@ int main(void)
  8000c0c:	c40f      	stmia	r4!, {r0, r1, r2, r3}
  8000c0e:	e895 0003 	ldmia.w	r5, {r0, r1}
  8000c12:	e884 0003 	stmia.w	r4, {r0, r1}
-	int entry[5] = {1,2,3,4,5};
+	int entry[N] = {1,2,3,4,5};
  8000c16:	4b31      	ldr	r3, [pc, #196]	@ (8000cdc <main+0xe4>)
  8000c18:	f107 0434 	add.w	r4, r7, #52	@ 0x34
  8000c1c:	461d      	mov	r5, r3
@@ -1055,7 +1056,7 @@ int main(void)
  8000c30:	c40f      	stmia	r4!, {r0, r1, r2, r3}
  8000c32:	e895 0003 	ldmia.w	r5, {r0, r1}
  8000c36:	e884 0003 	stmia.w	r4, {r0, r1}
-	int result[F][S] = {{F,S},{0,0},{0,0}};
+	int result[F][S] = {{F,S},{N,0},{0,0}};
  8000c3a:	4b2a      	ldr	r3, [pc, #168]	@ (8000ce4 <main+0xec>)
  8000c3c:	1d3c      	adds	r4, r7, #4
  8000c3e:	461d      	mov	r5, r3
