@@ -61,23 +61,23 @@ add_loop:
 @ R6 used for calculation of value to be put into result[][]
 @ DO NOT TOUCH R7
 @ R8 used to hold value of cars exiting from section for calculation
-@ R10 to store number of cars that can enter in each section
-@ R12 total number of sections
+
 
 handle_day:
 	LDR R6, [R0], #4 @use R6 to hold cars in current section for calculation
-	SUB R10, R1, R6 @r10 to hold #cars that can enter curr section
+	SUB R6, R1, R6 @r10 to hold #cars that can enter curr section
 
-	CMP R5, R10
+	CMP R5, R6
 	BGT leftover_cars
 	B no_leftover_cars
 
 leftover_cars:
+	SUB R5, R6 @subtract cars that successfully entered
 	LDR R8, [R2], #4 @load exiting cars in r8
 	SUBS R6, R1, R8
 	BMI neg_cars
 	STR R6, [R3], #4
-	SUB R5, R10
+
 	B go_next_section
 
 neg_cars:
