@@ -25,18 +25,17 @@
 @ R0 BUILDING
 @ R1 ENTRY, reused to hold max cars per section
 @ R2 EXIT
-@ R3 RESULT
+@ R3 PARAMS, reused to hold value of cars exiting from section for calculation
 @ R4 total number of sections, used for iteration
 @ R5 number of entering cars to be parked
 @ R6 used for calculation of value to be put into result[][]
-@ R7 used to hold value of cars exiting from section for calculation
 
 @ write your program from here:
 
 .equ max_cars_per_section, 12
 
 asm_func:
- 	PUSH {R4-R7, R14} //rest should be untouched
+ 	PUSH {R4-R6, R14} //rest should be untouched
 	//find total cars coming in
 	LDR R4, [R3] @load f into r4
 	LDR R5, [R3, #4] @load s into r5
@@ -45,8 +44,8 @@ asm_func:
 	LDR R6, [R3, #8] //size of entry[]
 
 add_loop:
-	LDR R7, [R1], #4 //R7 to store
-	ADD R5, R7 //add to total cars
+	LDR R3, [R1], #4 //reuse R3 to store
+	ADD R5, R3 //add to total cars
 
 	SUBS R6, #1 //check how many in entry[] left
 	BNE add_loop  //checks if flag updated from prev line
@@ -54,8 +53,8 @@ add_loop:
 	LDR R1, =max_cars_per_section
 
 handle_day:
-	LDR R6, [R0], #4 @use R6 to hold cars in current section for calculation
-	LDR R7, [R2], #4 @load exiting cars from section
+	LDR R6, [R0] @use R6 to hold cars in current section for calculation
+	LDR R3, [R2], #4 @load exiting cars from section
 	SUB R6, R1, R6 @r6 to hold #cars that can enter curr section
 
 	CMP R5, R6 //check if got excess cars
@@ -69,13 +68,13 @@ handle_day:
 		MOVLT R5, #0
 
 	//at this point R6 should either 12 or number of cars needed to park
-	SUBS R6, R7 //exit
+	SUBS R6, R3 //exit
 	IT MI
 		MOVMI R6, #0 //set to 0 to prevent underflow
 
-	STR R6, [R3], #4
+	STR R6, [R0], #4
 	SUBS R4, #1
 	BNE handle_day
 
-	POP {R4-R7,R14}
+	POP {R4-R6,R14}
 	BX LR
