@@ -27,14 +27,13 @@
 @ R2 EXIT
 @ R3 RESULT
 @ R4 total number of sections
-@ DO NOT TOUCH R7
 
 @ write your program from here:
 
 .equ max_cars_per_section, 12
 
 asm_func:
- 	PUSH {R14}
+ 	PUSH {R4-R7, R14} //rest should be untouched
 
 	//find total cars coming in
 	LDR R4, [R3] @load f into r4
@@ -59,48 +58,33 @@ add_loop:
 @ R4 total number of sections, used for iteration
 @ R5 number of entering cars
 @ R6 used for calculation of value to be put into result[][]
-@ DO NOT TOUCH R7
-@ R8 used to hold value of cars exiting from section for calculation
+@ R7 used to hold value of cars exiting from section for calculation
 
 
 handle_day:
 	LDR R6, [R0], #4 @use R6 to hold cars in current section for calculation
-	SUB R6, R1, R6 @r10 to hold #cars that can enter curr section
+	LDR R7, [R2], #4 @load exiting cars from section
+	SUB R6, R1, R6 @r6 to hold #cars that can enter curr section
 
-	CMP R5, R6
-	BGT leftover_cars
-	B no_leftover_cars
+	CMP R5, R6 //check if got excess cars
 
-leftover_cars:
-	SUB R5, R6 @subtract cars that successfully entered
-	LDR R8, [R2], #4 @load exiting cars in r8
-	SUBS R6, R1, R8
-	BMI neg_cars
+	ITT GE //got excess cars or just nice
+		SUBGE R5, R6 //subtract from sum of unparked cars
+		MOVGE R6, R1 //make r6 max cars
+
+	ITTT LT //rest can fit
+		SUBLT R6, R1, R6 //make r6 hold cars alr parked
+		ADDLT R6, R5 //find total #cars now parked
+		MOVLT R5, #0
+
+	//at this point R6 should either 12 or number of cars needed to park
+	SUBS R6, R7 //exit
+	IT MI
+		MOVMI R6, #0 //set to 0 to prevent underflow
+
 	STR R6, [R3], #4
-
-	B go_next_section
-
-neg_cars:
-	MOV R6, #0
-	STR R6, [R3], #4
-	B go_next_section
-
-no_leftover_cars:
-	LDR R8, [R2], #4 //load exiting cars from section
-	ADD R6, R5 //add current cars with leftover cars
-	SUBS R6, R8
-	BMI neg_cars
-	STR R6, [R3], #4
-	MOV R5, #0
-	CMP R4, #0
-	BEQ end_loop
-	B go_next_section
-
-go_next_section:
-	@how many sections remaining
 	SUBS R4, #1
 	BNE handle_day
 
-end_loop:
-	POP {R14}
+	POP {R4-R7,R14}
 	BX LR
