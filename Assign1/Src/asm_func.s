@@ -17,16 +17,19 @@
 @ CG/[T]EE2028 Assignment 1, Sem 2, AY 2024/25
 @ (c) ECE NUS, 2025
 
-@ Write Student 1’s Name here:
-@ Write Student 2’s Name here:
+@ Write Student 1’s Name here: Ng Weiliang
+@ Write Student 2’s Name here: Yee Zhan Xian Carlton
 
 @ Look-up table for registers:
 
 @ R0 BUILDING
-@ R1 ENTRY
+@ R1 ENTRY, reused to hold max cars per section
 @ R2 EXIT
 @ R3 RESULT
-@ R4 total number of sections
+@ R4 total number of sections, used for iteration
+@ R5 number of entering cars to be parked
+@ R6 used for calculation of value to be put into result[][]
+@ R7 used to hold value of cars exiting from section for calculation
 
 @ write your program from here:
 
@@ -34,7 +37,6 @@
 
 asm_func:
  	PUSH {R4-R7, R14} //rest should be untouched
-
 	//find total cars coming in
 	LDR R4, [R3] @load f into r4
 	LDR R8, [R3, #4] @load s into r8
@@ -51,23 +53,12 @@ add_loop:
 
 	LDR R1, =max_cars_per_section
 
-@ R0 BUILDING
-@ R1 max cars per section
-@ R2 EXIT
-@ R3 RESULT
-@ R4 total number of sections, used for iteration
-@ R5 number of entering cars
-@ R6 used for calculation of value to be put into result[][]
-@ R7 used to hold value of cars exiting from section for calculation
-
-
 handle_day:
 	LDR R6, [R0], #4 @use R6 to hold cars in current section for calculation
 	LDR R7, [R2], #4 @load exiting cars from section
 	SUB R6, R1, R6 @r6 to hold #cars that can enter curr section
 
 	CMP R5, R6 //check if got excess cars
-
 	ITT GE //got excess cars or just nice
 		SUBGE R5, R6 //subtract from sum of unparked cars
 		MOVGE R6, R1 //make r6 max cars

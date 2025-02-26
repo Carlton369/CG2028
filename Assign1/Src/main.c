@@ -31,11 +31,8 @@ int main(void)
 	initialise_monitor_handles();
 	int i,j;
 	int building[F][S] = {{9,10},{7,8},{4,4}};
-
 	int entry[5] = {2,4,6,8,10};
-
 	int exit[F][S] = {{1,1},{1,1},{1,1}};
-
 	int result[F][S] = {{F,S},{0,0},{0,0}};
 
 	asm_func((int*)building, (int*)entry, (int*)exit, (int*)result);
@@ -51,5 +48,4 @@ int main(void)
 		}
 	printf("\n");
 	}
-	printf("done");
 }
